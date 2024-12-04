@@ -3,14 +3,14 @@
 
 <head>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-587Y00GFHZ"></script>
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-587Y00GFHZ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'G-587Y00GFHZ');
-</script>
+</script> -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechNova Blog</title>
@@ -43,6 +43,50 @@
             <p>Stay tuned to TechNova for in-depth articles on these topics and more!</p>
         </article>
     </main>
+    <script>
+    // Simple function to generate a random session ID if one doesn't exist
+    function getSessionId() {
+        let sessionId = localStorage.getItem('sessionId');
+        if (!sessionId) {
+            sessionId = Math.random().toString(36).substring(2, 15);
+            localStorage.setItem('sessionId', sessionId);
+        }
+        return sessionId;
+    }
+
+    // Function to track page views
+    function trackPageView() {
+        const url = window.location.href; // The current URL
+        const referrer = document.referrer; // The referring URL
+        const userAgent = navigator.userAgent; // User's browser info
+        const sessionId = getSessionId(); // Get the session ID
+
+        // Send the tracking data to the backend
+        fetch('http://localhost:3000/log', {  // Replace with your server's URL
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                page: url,
+                referrer: referrer,
+                userAgent: userAgent,
+                sessionId: sessionId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Page view logged successfully:", data);
+        })
+        .catch(error => {
+            console.error("Error logging page view:", error);
+        });
+    }
+
+    // Track page view when the page loads
+    window.addEventListener('load', trackPageView);
+</script>
+
     <footer>
         <p>&copy; 2024 TechNova. All rights reserved.</p>
     </footer>
