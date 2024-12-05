@@ -1,31 +1,102 @@
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
+/* General Reset */
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
     background-color: #f4f4f9;
     color: #333;
+    padding: 0;
+    margin: 0;
 }
 
+/* Header and Navigation */
 header {
-    background-color: #007BFF;
-    color: white;
-    text-align: center;
-    padding: 20px 0;
+    background-color: #1e90ff;
+    color: #fff;
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+header nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+header nav a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+header nav a:hover {
+    color: #ffeb3b;
+}
+
+/* Main Content */
 main {
-    padding: 20px;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-article h2 {
-    color: #007BFF;
+main h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #1e90ff;
 }
 
+main p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+/* Footer */
 footer {
     text-align: center;
-    margin-top: 20px;
-    padding: 10px 0;
-    background-color: #007BFF;
-    color: white;
+    padding: 1rem;
+    background: #1e90ff;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+/* Links in Main */
+a {
+    color: #1e90ff;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #ff6347;
+}
+
+/* Add Responsiveness */
+@media (max-width: 768px) {
+    header nav {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    main {
+        margin: 1rem;
+        padding: 1rem;
+    }
 }
