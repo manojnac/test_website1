@@ -44,12 +44,12 @@ function sendDataToFirebase(data) {
   const refPath = `websiteData/${visitorID}/${timestamp}`;
   const dataRef = ref(db, refPath);
   set(dataRef, data);
-    .then(() => {
-      console.log('Data successfully written to Firebase:', data); // Success log
-    })
-    .catch((error) => {
-      console.error('Error writing data to Firebase:', error); // Error log
-    });// This writes data to Firebase Realtime Database
+    // .then(() => {
+    //   console.log('Data successfully written to Firebase:', data); // Success log
+    // })
+    // .catch((error) => {
+    //   console.error('Error writing data to Firebase:', error); // Error log
+    // });// This writes data to Firebase Realtime Database
 }
 
 // Track Page View
