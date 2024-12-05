@@ -25,125 +25,164 @@
     </main>
 
     <script type="module">
-        // Import necessary Firebase modules from the Firebase SDK
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-        import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+    // Import necessary Firebase modules from the Firebase SDK
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
 
-        // Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
-          authDomain: "swat-173ca.firebaseapp.com",
-          databaseURL: "https://swat-173ca-default-rtdb.firebaseio.com",
-          projectId: "swat-173ca",
-          storageBucket: "swat-173ca.firebasestorage.app",
-          messagingSenderId: "948374024673",
-          appId: "1:948374024673:web:b224c6b7262ebf927362a0",
-          measurementId: "G-8HYY41WFS0"
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
+      authDomain: "swat-173ca.firebaseapp.com",
+      databaseURL: "https://swat-173ca-default-rtdb.firebaseio.com",
+      projectId: "swat-173ca",
+      storageBucket: "swat-173ca.firebasestorage.app",
+      messagingSenderId: "948374024673",
+      appId: "1:948374024673:web:b224c6b7262ebf927362a0",
+      measurementId: "G-8HYY41WFS0"
+    };
+
+    // Initialize Firebase app
+    const app = initializeApp(firebaseConfig);
+
+    // Initialize Firebase Realtime Database
+    const db = getDatabase(app);
+
+    // Helper functions
+    function generateVisitorID() {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // Retrieve or set Visitor ID
+    let visitorID = localStorage.getItem('visitorID') || generateVisitorID();
+    localStorage.setItem('visitorID', visitorID);
+
+    // Log the visitor ID after it's been initialized
+    // console.log('Visitor ID:', visitorID);
+
+    // Track session data
+    let sessionStartTime = Date.now();
+    let hasNavigated = false;
+    console.log('Session Start Time:', sessionStartTime);
+
+    // Function to send data to Firebase
+    function sendDataToFirebase(data) {
+        let timestamp = new Date().toISOString();
+        // Sanitize timestamp for use in Firebase paths
+        timestamp = timestamp.replace(/[:.]/g, '_'); // Replace invalid characters with underscores
+
+        const refPath = `websiteData/${visitorID}/${timestamp}`;
+        const dataRef = ref(db, refPath);
+        set(dataRef, data)
+            .then(() => {
+                console.log('Data successfully written to Firebase:', data);
+            })
+            .catch((error) => {
+                console.error('Error writing data to Firebase:', error);
+            });
+    }
+
+    // Function to track page view count for the day
+    async function trackPageViewCount() {
+        const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const pageViewRef = ref(db, `pageViewsPerDay/${currentDate}`);
+        const snapshot = await get(pageViewRef);
+
+        let pageViewCount = 0;
+
+        if (snapshot.exists()) {
+            pageViewCount = snapshot.val(); // Get the current page view count for today
+        }
+
+        // Increment the count
+        pageViewCount++;
+
+        // Save the updated page view count back to Firebase
+        set(pageViewRef, pageViewCount)
+            .then(() => {
+                console.log(`Page views for ${currentDate}: ${pageViewCount}`);
+            })
+            .catch((error) => {
+                console.error('Error updating page views count:', error);
+            });
+    }
+
+    // Function to track sessions (total and single-page)
+    async function trackSessions() {
+        const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const sessionsRef = ref(db, `sessions/${currentDate}`);
+        const snapshot = await get(sessionsRef);
+
+        let totalSessions = 0;
+        let singlePageSessions = 0;
+
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            totalSessions = data.totalSessions || 0;
+            singlePageSessions = data.singlePageSessions || 0;
+        }
+
+        // Increment total sessions count
+        totalSessions++;
+
+        // If it's a single-page session (no navigation to another page)
+        if (!hasNavigated) {
+            singlePageSessions++;
+        }
+
+        // Update Firebase with new session counts
+        set(sessionsRef, {
+            totalSessions,
+            singlePageSessions
+        })
+            .then(() => {
+                console.log(`Total Sessions: ${totalSessions}, Single-Page Sessions: ${singlePageSessions}`);
+            })
+            .catch((error) => {
+                console.error('Error updating session counts:', error);
+            });
+    }
+
+    // Track Page View
+    function trackPageView() {
+        const pageViewData = {
+            type: "page_view",
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
         };
+        console.log('Page View Data:', pageViewData);
+        sendDataToFirebase(pageViewData);
 
-        // Initialize Firebase app
-        const app = initializeApp(firebaseConfig);
+        // Update page view count for today
+        trackPageViewCount();
+    }
 
-        // Initialize Firebase Realtime Database
-        const db = getDatabase(app);
+    // Track Session Duration
+    window.addEventListener('beforeunload', () => {
+        const sessionEndTime = Date.now();
+        const sessionDuration = (sessionEndTime - sessionStartTime) / 1000; // in seconds
+        const sessionData = {
+            type: "session",
+            duration: sessionDuration,
+            singlePageSession: !hasNavigated,
+        };
+        console.log('Session Data:', sessionData);
+        sendDataToFirebase(sessionData);
 
-        // Helper functions
-        function generateVisitorID() {
-          return '_' + Math.random().toString(36).substr(2, 9);
+        // Update session counts
+        trackSessions();
+    });
+
+    // Track Navigation
+    window.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+            hasNavigated = true; // User navigated to another page
+            console.log('Navigation Detected:', hasNavigated);
         }
+    });
 
-        // Retrieve or set Visitor ID
-        let visitorID = localStorage.getItem('visitorID') || generateVisitorID();
-        localStorage.setItem('visitorID', visitorID);
-
-        // Log the visitor ID after it's been initialized
-        // console.log('Visitor ID:', visitorID);
-
-        // Track session data
-        let sessionStartTime = Date.now();
-        let hasNavigated = false;
-        console.log('Session Start Time:', sessionStartTime);
-
-        // Function to send data to Firebase
-        function sendDataToFirebase(data) {
-            let timestamp = new Date().toISOString();
-            // Sanitize timestamp for use in Firebase paths
-            timestamp = timestamp.replace(/[:.]/g, '_'); // Replace invalid characters with underscores
-
-            const refPath = `websiteData/${visitorID}/${timestamp}`;
-            const dataRef = ref(db, refPath);
-            set(dataRef, data)
-                .then(() => {
-                    console.log('Data successfully written to Firebase:', data);
-                })
-                .catch((error) => {
-                    console.error('Error writing data to Firebase:', error);
-                });
-        }
-
-        // Function to track page view count for the day
-        async function trackPageViewCount() {
-            const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-            const pageViewRef = ref(db, `pageViewsPerDay/${currentDate}`);
-            const snapshot = await get(pageViewRef);
-
-            let pageViewCount = 0;
-
-            if (snapshot.exists()) {
-                pageViewCount = snapshot.val(); // Get the current page view count for today
-            }
-
-            // Increment the count
-            pageViewCount++;
-
-            // Save the updated page view count back to Firebase
-            set(pageViewRef, pageViewCount)
-                .then(() => {
-                    console.log(`Page views for ${currentDate}: ${pageViewCount}`);
-                })
-                .catch((error) => {
-                    console.error('Error updating page views count:', error);
-                });
-        }
-
-        // Track Page View
-        function trackPageView() {
-            const pageViewData = {
-                type: "page_view",
-                url: window.location.href,
-                timestamp: new Date().toISOString(),
-            };
-            console.log('Page View Data:', pageViewData);
-            sendDataToFirebase(pageViewData);
-
-            // Update page view count for today
-            trackPageViewCount();
-        }
-
-        // Track Session Duration
-        window.addEventListener('beforeunload', () => {
-            const sessionEndTime = Date.now();
-            const sessionDuration = (sessionEndTime - sessionStartTime) / 1000; // in seconds
-            const sessionData = {
-                type: "session",
-                duration: sessionDuration,
-                singlePageSession: !hasNavigated,
-            };
-            console.log('Session Data:', sessionData);
-            sendDataToFirebase(sessionData);
-        });
-
-        // Track Navigation
-        window.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A') {
-                hasNavigated = true; // User navigated to another page
-                console.log('Navigation Detected:', hasNavigated);
-            }
-        });
-
-        // Initial Page View
-        trackPageView();
-    </script>
+    // Initial Page View
+    trackPageView();
+</script>
 
 </body>
 </html>
