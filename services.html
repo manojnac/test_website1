@@ -49,27 +49,22 @@
 
     // Helper functions
     function generateVisitorID() {
-      return '_' + Math.random().toString(36).substr(2, 9);
+        return '_' + Math.random().toString(36).substr(2, 9);
     }
 
     // Retrieve or set Visitor ID
     let visitorID = localStorage.getItem('visitorID') || generateVisitorID();
     localStorage.setItem('visitorID', visitorID);
 
-    // Log the visitor ID after it's been initialized
-    // console.log('Visitor ID:', visitorID);
-
     // Track session data
     let sessionStartTime = Date.now();
     let hasNavigated = false;
-    let clickCount = 0; // Track the number of clicks
-    console.log('Session Start Time:', sessionStartTime);
+    let clickCount = 0;
 
     // Function to send data to Firebase
     function sendDataToFirebase(data) {
         let timestamp = new Date().toISOString();
-        // Sanitize timestamp for use in Firebase paths
-        timestamp = timestamp.replace(/[:.]/g, '_'); // Replace invalid characters with underscores
+        timestamp = timestamp.replace(/[:.]/g, '_'); // Sanitize timestamp for use in Firebase paths
 
         const refPath = `websiteData/${visitorID}/${timestamp}`;
         const dataRef = ref(db, refPath);
@@ -153,6 +148,30 @@
             });
     }
 
+    // Function to get and store geolocation data
+    function trackGeolocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const geoData = {
+                        type: "geolocation",
+                        latitude,
+                        longitude,
+                        timestamp: new Date().toISOString(),
+                    };
+                    console.log('Geolocation Data:', geoData);
+                    sendDataToFirebase(geoData);
+                },
+                (error) => {
+                    console.error('Error fetching geolocation:', error.message);
+                }
+            );
+        } else {
+            console.error('Geolocation is not supported by this browser.');
+        }
+    }
+
     // Track Page View
     function trackPageView() {
         const pageViewData = {
@@ -165,7 +184,13 @@
 
         // Update page view count for today
         trackPageViewCount();
+
+        // Track geolocation data
+        trackGeolocation();
     }
+
+    // Initial Page View
+    trackPageView();
 
     // Track Session Duration and Clicks
     window.addEventListener('beforeunload', () => {
@@ -175,7 +200,7 @@
             type: "session",
             duration: sessionDuration,
             singlePageSession: !hasNavigated,
-            clicks: clickCount // Add click count to session data
+            clicks: clickCount,
         };
         console.log('Session Data:', sessionData);
         sendDataToFirebase(sessionData);
@@ -188,14 +213,10 @@
     window.addEventListener('click', (e) => {
         if (e.target.tagName === 'A') {
             hasNavigated = true; // User navigated to another page
-            console.log('Navigation Detected:', hasNavigated);
         } else {
             clickCount++; // Increment click count for every click on the page
         }
     });
-
-    // Initial Page View
-    trackPageView();
 </script>
 
 
