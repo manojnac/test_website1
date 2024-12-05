@@ -1,4 +1,8 @@
-// Initialize Firebase
+// Import necessary Firebase modules from the Firebase SDK
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set } from "firebase/database";
+
+// Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
   authDomain: "swat-173ca.firebaseapp.com",
@@ -10,9 +14,11 @@ const firebaseConfig = {
   measurementId: "G-8HYY41WFS0"
 };
 
-// Initialize Firebase app and database
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.getDatabase(app);
+// Initialize Firebase app
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase Realtime Database
+const db = getDatabase(app);
 
 // Helper functions
 function generateVisitorID() {
@@ -30,8 +36,9 @@ let hasNavigated = false;
 // Function to send data to Firebase
 function sendDataToFirebase(data) {
   const timestamp = new Date().toISOString();
-  const ref = firebase.ref(db, `websiteData/${visitorID}/${timestamp}`);
-  firebase.set(ref, data);
+  const refPath = `websiteData/${visitorID}/${timestamp}`;
+  const dataRef = ref(db, refPath);
+  set(dataRef, data); // This writes data to Firebase Realtime Database
 }
 
 // Track Page View
