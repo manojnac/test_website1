@@ -1,7 +1,8 @@
 // Import necessary Firebase modules from the Firebase SDK
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set } from "firebase/database";
-
+// import { initializeApp } from "firebase/app";
+// import { getDatabase, ref, set } from "firebase/database";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
 // Your Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
