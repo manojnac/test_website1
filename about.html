@@ -6,9 +6,9 @@
     <title>About</title>
     <link rel="stylesheet" href="styles.css">
 
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+<!--     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
-    <script type="module" src="/tracker.js" defer></script>
+    <script type="module" src="/tracker.js" defer></script> -->
 </head>
 <body>
     <header>
@@ -23,5 +23,99 @@
         <h1>About Us</h1>
         <p>This page provides information about our company.</p>
     </main>
+
+    <script type="module">
+        // Import necessary Firebase modules from the Firebase SDK
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
+          authDomain: "swat-173ca.firebaseapp.com",
+          databaseURL: "https://swat-173ca-default-rtdb.firebaseio.com",
+          projectId: "swat-173ca",
+          storageBucket: "swat-173ca.firebasestorage.app",
+          messagingSenderId: "948374024673",
+          appId: "1:948374024673:web:b224c6b7262ebf927362a0",
+          measurementId: "G-8HYY41WFS0"
+        };
+
+        // Initialize Firebase app
+        const app = initializeApp(firebaseConfig);
+
+        // Initialize Firebase Realtime Database
+        const db = getDatabase(app);
+
+        // Helper functions
+        function generateVisitorID() {
+          return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Retrieve or set Visitor ID
+        let visitorID = localStorage.getItem('visitorID') || generateVisitorID();
+        localStorage.setItem('visitorID', visitorID);
+
+        // Log the visitor ID after it's been initialized
+        // console.log('Visitor ID:', visitorID);
+
+        // Track session data
+        let sessionStartTime = Date.now();
+        let hasNavigated = false;
+        console.log('Session Start Time:', sessionStartTime);
+
+        // Function to send data to Firebase
+       function sendDataToFirebase(data) {
+            let timestamp = new Date().toISOString();
+    // Sanitize timestamp for use in Firebase paths
+            timestamp = timestamp.replace(/[:.]/g, '_'); // Replace invalid characters with underscores
+
+            const refPath = `websiteData/${visitorID}/${timestamp}`;
+            const dataRef = ref(db, refPath);
+            set(dataRef, data)
+                .then(() => {
+                    console.log('Data successfully written to Firebase:', data);
+                })
+                .catch((error) => {
+                    console.error('Error writing data to Firebase:', error);
+                });
+        }
+
+
+        // Track Page View
+        function trackPageView() {
+          const pageViewData = {
+            type: "page_view",
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+          };
+          console.log('Page View Data:', pageViewData);
+          sendDataToFirebase(pageViewData);
+        }
+
+        // Track Session Duration
+        window.addEventListener('beforeunload', () => {
+          const sessionEndTime = Date.now();
+          const sessionDuration = (sessionEndTime - sessionStartTime) / 1000; // in seconds
+          const sessionData = {
+            type: "session",
+            duration: sessionDuration,
+            singlePageSession: !hasNavigated,
+          };
+          console.log('Session Data:', sessionData);
+          sendDataToFirebase(sessionData);
+        });
+
+        // Track Navigation
+        window.addEventListener('click', (e) => {
+          if (e.target.tagName === 'A') {
+            hasNavigated = true; // User navigated to another page
+            console.log('Navigation Detected:', hasNavigated);
+          }
+        });
+
+        // Initial Page View
+        trackPageView();
+    </script>
 </body>
 </html>
