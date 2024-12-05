@@ -1,100 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Google tag (gtag.js) -->
-<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-587Y00GFHZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-587Y00GFHZ');
-</script> -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechNova Blog</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Home</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
-    <script src="tracker.js"></script>
+    <script src="tracker.js" defer></script>
 </head>
-
 <body>
     <header>
-        <h1>TechNova</h1>
-        <p>Your daily dose of tech trends and innovations!</p>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="services.html">Services</a>
+            <a href="contact.html">Contact</a>
+        </nav>
     </header>
     <main>
-        <article>
-            <h2>5 Emerging Technologies in 2024</h2>
-            <p>The world of technology continues to evolve at a breakneck pace. Here are five technologies that are
-                shaping the future:</p>
-            <ul>
-                <li><strong>AI and Machine Learning:</strong> Revolutionizing industries with smarter automation and
-                    insights.</li>
-                <li><strong>Quantum Computing:</strong> Solving problems once thought unsolvable with immense
-                    computational power.</li>
-                <li><strong>5G Connectivity:</strong> Empowering the Internet of Things (IoT) and faster communication
-                    networks.</li>
-                <li><strong>Blockchain Beyond Crypto:</strong> Securing data and enabling decentralized applications.
-                </li>
-                <li><strong>Augmented Reality (AR):</strong> Enhancing real-world experiences with immersive digital
-                    layers.</li>
-            </ul>
-            <p>Stay tuned to TechNova for in-depth articles on these topics and more!</p>
-        </article>
+        <h1>Welcome to the Home Page</h1>
+        <p>This is the main page of our website.</p>
     </main>
-
-    <footer>
-        <p>&copy; 2024 TechNova. All rights reserved.</p>
-    </footer>
-    
-    <script>
-    // Simple function to generate a random session ID if one doesn't exist
-    function getSessionId() {
-        let sessionId = localStorage.getItem('sessionId');
-        if (!sessionId) {
-            sessionId = Math.random().toString(36).substring(2, 15);
-            localStorage.setItem('sessionId', sessionId);
-        }
-        return sessionId;
-    }
-
-    // Function to track page views
-    function trackPageView() {
-        const url = window.location.href; // The current URL
-        const referrer = document.referrer; // The referring URL
-        const userAgent = navigator.userAgent; // User's browser info
-        const sessionId = getSessionId(); // Get the session ID
-
-        // Send the tracking data to the backend
-        fetch('http://localhost:3000/log', {  // Replace with your server's URL
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                page: url,
-                referrer: referrer,
-                userAgent: userAgent,
-                sessionId: sessionId
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Page view logged successfully:", data);
-        })
-        .catch(error => {
-            console.error("Error logging page view:", error);
-        });
-    }
-
-    // Track page view when the page loads
-    window.addEventListener('load', trackPageView);
-</script>
-
-    
 </body>
-
 </html>
