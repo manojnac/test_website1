@@ -31,14 +31,14 @@
 
     // Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
-      authDomain: "swat-173ca.firebaseapp.com",
-      databaseURL: "https://swat-173ca-default-rtdb.firebaseio.com",
-      projectId: "swat-173ca",
-      storageBucket: "swat-173ca.firebasestorage.app",
-      messagingSenderId: "948374024673",
-      appId: "1:948374024673:web:b224c6b7262ebf927362a0",
-      measurementId: "G-8HYY41WFS0"
+        apiKey: "AIzaSyCVq9WeE1hqTdMsdT3miAUbTc9g0z0QjJ8",
+        authDomain: "swat-173ca.firebaseapp.com",
+        databaseURL: "https://swat-173ca-default-rtdb.firebaseio.com",
+        projectId: "swat-173ca",
+        storageBucket: "swat-173ca.appspot.com",
+        messagingSenderId: "948374024673",
+        appId: "1:948374024673:web:b224c6b7262ebf927362a0",
+        measurementId: "G-8HYY41WFS0"
     };
 
     // Initialize Firebase app
@@ -62,12 +62,8 @@
     let clickCount = 0;
 
     // Function to send data to Firebase
-    function sendDataToFirebase(data) {
-        let timestamp = new Date().toISOString();
-        timestamp = timestamp.replace(/[:.]/g, '_'); // Sanitize timestamp for use in Firebase paths
-
-        const refPath = `websiteData/${visitorID}/${timestamp}`;
-        const dataRef = ref(db, refPath);
+    function sendDataToFirebase(data, path) {
+        const dataRef = ref(db, path);
         set(dataRef, data)
             .then(() => {
                 console.log('Data successfully written to Firebase:', data);
@@ -93,13 +89,7 @@
         pageViewCount++;
 
         // Save the updated page view count back to Firebase
-        set(pageViewRef, pageViewCount)
-            .then(() => {
-                console.log(`Page views for ${currentDate}: ${pageViewCount}`);
-            })
-            .catch((error) => {
-                console.error('Error updating page views count:', error);
-            });
+        sendDataToFirebase(pageViewCount, `pageViewsPerDay/${currentDate}`);
     }
 
     // Function to track sessions (total and single-page)
@@ -134,18 +124,12 @@
         totalSessionDuration += (Date.now() - sessionStartTime) / 1000; // in seconds
 
         // Update Firebase with new session counts and total click count
-        set(sessionsRef, {
+        sendDataToFirebase({
             totalSessions,
             singlePageSessions,
             totalClicks,
             totalSessionDuration
-        })
-            .then(() => {
-                console.log(`Total Sessions: ${totalSessions}, Single-Page Sessions: ${singlePageSessions}, Total Clicks: ${totalClicks}, Total Session Duration: ${totalSessionDuration} seconds`);
-            })
-            .catch((error) => {
-                console.error('Error updating session counts:', error);
-            });
+        }, `sessions/${currentDate}`);
     }
 
     // Function to get and store geolocation data
@@ -154,14 +138,18 @@
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
+                    const timestamp = new Date().toISOString();
+
                     const geoData = {
-                        type: "geolocation",
                         latitude,
                         longitude,
-                        timestamp: new Date().toISOString(),
+                        timestamp
                     };
+
                     console.log('Geolocation Data:', geoData);
-                    sendDataToFirebase(geoData);
+
+                    // Write geolocation data to a dedicated node
+                    sendDataToFirebase(geoData, `geolocations/${visitorID}/${timestamp.replace(/[:.]/g, '_')}`);
                 },
                 (error) => {
                     console.error('Error fetching geolocation:', error.message);
@@ -180,7 +168,7 @@
             timestamp: new Date().toISOString(),
         };
         console.log('Page View Data:', pageViewData);
-        sendDataToFirebase(pageViewData);
+        sendDataToFirebase(pageViewData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
         // Update page view count for today
         trackPageViewCount();
@@ -203,7 +191,7 @@
             clicks: clickCount,
         };
         console.log('Session Data:', sessionData);
-        sendDataToFirebase(sessionData);
+        sendDataToFirebase(sessionData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
         // Update session counts and clicks
         trackSessions();
