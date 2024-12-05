@@ -24,6 +24,8 @@ const db = getDatabase(app);
 function generateVisitorID() {
   return '_' + Math.random().toString(36).substr(2, 9);
 }
+console.log('Visitor ID:', visitorID);
+
 
 // Retrieve or set Visitor ID
 let visitorID = localStorage.getItem('visitorID') || generateVisitorID();
@@ -32,13 +34,21 @@ localStorage.setItem('visitorID', visitorID);
 // Track session data
 let sessionStartTime = Date.now();
 let hasNavigated = false;
+console.log('Session Start Time:', sessionStartTime);
+
 
 // Function to send data to Firebase
 function sendDataToFirebase(data) {
   const timestamp = new Date().toISOString();
   const refPath = `websiteData/${visitorID}/${timestamp}`;
   const dataRef = ref(db, refPath);
-  set(dataRef, data); // This writes data to Firebase Realtime Database
+  set(dataRef, data);
+    .then(() => {
+      console.log('Data successfully written to Firebase:', data); // Success log
+    })
+    .catch((error) => {
+      console.error('Error writing data to Firebase:', error); // Error log
+    });// This writes data to Firebase Realtime Database
 }
 
 // Track Page View
@@ -48,6 +58,7 @@ function trackPageView() {
     url: window.location.href,
     timestamp: new Date().toISOString(),
   };
+  console.log('Page View Data:', pageViewData);
   sendDataToFirebase(pageViewData);
 }
 
@@ -60,6 +71,7 @@ window.addEventListener('beforeunload', () => {
     duration: sessionDuration,
     singlePageSession: !hasNavigated,
   };
+  console.log('Session Data:', sessionData);
   sendDataToFirebase(sessionData);
 });
 
@@ -67,6 +79,7 @@ window.addEventListener('beforeunload', () => {
 window.addEventListener('click', (e) => {
   if (e.target.tagName === 'A') {
     hasNavigated = true; // User navigated to another page
+    console.log('Navigation Detected:', hasNavigated); 
   }
 });
 
