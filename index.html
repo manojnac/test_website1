@@ -20,7 +20,7 @@
         <p>This is the main page of our website.</p>
     </main>
 
-    <script type="module">
+   <script type="module">
     // Import necessary Firebase modules from the Firebase SDK
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
     import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
@@ -46,6 +46,29 @@
     // Helper functions
     function generateVisitorID() {
         return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function getTrafficSource() {
+        const referrer = document.referrer;
+        if (!referrer) {
+            return "Direct"; // No referrer indicates direct traffic
+        } else if (referrer.includes("google.")) {
+            return "Search"; // Traffic from Google search
+        } else if (referrer.includes("facebook.com") || referrer.includes("twitter.com")) {
+            return "Social"; // Traffic from social media
+        } else {
+            return "Referral"; // All other referrers
+        }
+    }
+
+    function getBrowserName() {
+        const userAgent = navigator.userAgent;
+        if (userAgent.includes("Chrome")) return "Chrome";
+        if (userAgent.includes("Firefox")) return "Firefox";
+        if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) return "Safari";
+        if (userAgent.includes("Edge")) return "Edge";
+        if (userAgent.includes("Trident") || userAgent.includes("MSIE")) return "Internet Explorer";
+        return "Other";
     }
 
     // Retrieve or set Visitor ID
@@ -158,10 +181,15 @@
 
     // Track Page View
     function trackPageView() {
+        const trafficSource = getTrafficSource();
+        const browserName = getBrowserName();
+
         const pageViewData = {
             type: "page_view",
             url: window.location.href,
             timestamp: new Date().toISOString(),
+            trafficSource,
+            browserName
         };
         console.log('Page View Data:', pageViewData);
         sendDataToFirebase(pageViewData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
@@ -185,6 +213,8 @@
             duration: sessionDuration,
             singlePageSession: !hasNavigated,
             clicks: clickCount,
+            trafficSource: getTrafficSource(),
+            browserName: getBrowserName()
         };
         console.log('Session Data:', sessionData);
         sendDataToFirebase(sessionData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
@@ -202,6 +232,7 @@
         }
     });
 </script>
+
 
 </body>
 </html>
