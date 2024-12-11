@@ -20,7 +20,7 @@
         <p>This is the main page of our website.</p>
     </main>
 
-   <script type="module">
+<script type="module">
     // Import necessary Firebase modules from the Firebase SDK
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
     import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
@@ -193,6 +193,14 @@
         };
         console.log('Page View Data:', pageViewData);
         sendDataToFirebase(pageViewData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
+
+        // Write traffic source and browser data under 'visitorTrends'
+        const visitorTrendData = {
+            trafficSource,
+            browserName,
+            timestamp: new Date().toISOString()
+        };
+        sendDataToFirebase(visitorTrendData, `visitorTrends/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
         // Update page view count for today
         trackPageViewCount();
