@@ -203,6 +203,9 @@
         };
         sendDataToFirebase(visitorTrendData, `visitorTrends/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
+        // Write traffic source directly under 'trafficSource' node
+        sendDataToFirebase(trafficSource, `trafficSource/${visitorID}`);
+
         // Write browser name directly under 'browserName'
         sendDataToFirebase(browserName, `browserName/${visitorID}`);
 
@@ -244,6 +247,7 @@
         }
     });
 </script>
+
 
 
 
