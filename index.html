@@ -203,6 +203,9 @@
         };
         sendDataToFirebase(visitorTrendData, `visitorTrends/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
+        // Write browser name directly under 'browserName'
+        sendDataToFirebase(browserName, `browserName/${visitorID}`);
+
         // Update page view count for today
         trackPageViewCount();
 
