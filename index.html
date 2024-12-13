@@ -192,9 +192,14 @@
 
     // Track Page View
     // Track Page View
+// Track Page View
 function trackPageView() {
     const trafficSource = getTrafficSource();
     const browserName = getBrowserName();
+
+    // Log for debugging
+    console.log('Traffic Source:', trafficSource);
+    console.log('Browser Name:', browserName);
 
     const pageViewData = {
         type: "page_view",
@@ -206,8 +211,10 @@ function trackPageView() {
     console.log('Page View Data:', pageViewData);
     sendDataToFirebase(pageViewData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
-    // Write traffic source and browser data directly under their respective nodes
+    // Write traffic source directly under 'trafficSource'
     sendDataToFirebase(trafficSource, `trafficSource/${visitorID}`);
+    
+    // Write browser name directly under 'browserName'
     sendDataToFirebase(browserName, `browserName/${visitorID}`);
 
     // Update page view count for today
@@ -216,6 +223,7 @@ function trackPageView() {
     // Track geolocation data
     trackGeolocation();
 }
+
 
 
     // Initial Page View
