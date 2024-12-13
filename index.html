@@ -79,7 +79,7 @@
         if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) return "Safari"; // Detect Safari (exclude Chrome)
         if (userAgent.includes("Chrome")) return "Chrome"; // Detect Chrome
         if (userAgent.includes("Trident") || userAgent.includes("MSIE")) return "Internet Explorer"; // Detect IE
-        return "Chrome"; // Fallback for unknown browsers
+        return "Other"; // Fallback for unknown browsers
     }
 
     // Retrieve or set Visitor ID
