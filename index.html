@@ -193,6 +193,7 @@
     // Track Page View
     // Track Page View
 // Track Page View
+// Track Page View
 function trackPageView() {
     const trafficSource = getTrafficSource();
     const browserName = getBrowserName();
@@ -208,7 +209,11 @@ function trackPageView() {
         trafficSource,
         browserName
     };
+
+    // Log for debugging the pageViewData
     console.log('Page View Data:', pageViewData);
+
+    // Send page view data
     sendDataToFirebase(pageViewData, `websiteData/${visitorID}/${new Date().toISOString().replace(/[:.]/g, '_')}`);
 
     // Write traffic source directly under 'trafficSource'
@@ -216,6 +221,20 @@ function trackPageView() {
     
     // Write browser name directly under 'browserName'
     sendDataToFirebase(browserName, `browserName/${visitorID}`);
+
+    // Check if browser name is being written to the correct path
+    const browserNameRef = ref(db, `browserName/${visitorID}`);
+    get(browserNameRef)
+        .then(snapshot => {
+            if (snapshot.exists()) {
+                console.log('Successfully retrieved browserName:', snapshot.val());
+            } else {
+                console.log('No data found for browserName at this path');
+            }
+        })
+        .catch((error) => {
+            console.error('Error retrieving browserName:', error);
+        });
 
     // Update page view count for today
     trackPageViewCount();
